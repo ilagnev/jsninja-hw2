@@ -24,10 +24,10 @@ class httprr extends EventEmitter {
 
     server.on('connection', socket => {
       console.log('\n-> new connection');
-      socket.on('close', function() {
+      socket.on('close', () => {
         console.log('r: connection closed');
       });
-      socket.on('error', function(err) {
+      socket.on('error', err => {
         console.log('r:!! caught unexpected connection error: ', err.code);
       });
 
@@ -44,7 +44,7 @@ class httprr extends EventEmitter {
     });
 
     const listeningPort = process.env.PORT || 3000;
-    console.log('start listening: localhost:' + listeningPort);
+    console.log(`start listening: localhost: ${listeningPort}`);
     server.listen(listeningPort);
   }
 }

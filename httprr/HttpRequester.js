@@ -58,13 +58,9 @@ class HttpRequester extends Readable {
     console.log('request method: ', this.method);
     console.log('request url: ', this.url);
     console.log(
-      'request headers: \n\t' +
-        this.headers
-          .map(h => {
-            return '[' + h.key + '] ' + h.value;
-          })
-          .join('\n\t') +
-        '\n'
+      `request headers: \n\t${this.headers
+        .map(h => `[${h.key}] ${h.value}`)
+        .join('\n\t')}\n`
     );
 
     this.emit('headers');
@@ -75,7 +71,8 @@ class HttpRequester extends Readable {
 
     // check http GET request and save requested path
     const methodRegexp = /^([^ ]+) ([^ ]+) ([^\n]+)\r?\n/;
-    if (matches = requestHead.match(methodRegexp)) {
+    matches = requestHead.match(methodRegexp);
+    if (matches) {
       // console.log('method matches:', matches);
       this.method = matches[1];
       this.url = matches[2];
@@ -84,7 +81,8 @@ class HttpRequester extends Readable {
     // collect headers
     const headersRegexp = /^([^:]+): ([^$]+)$/;
     requestHead.split('\r\n').forEach(line => {
-      if (matches = line.match(headersRegexp)) {
+      matches = line.match(headersRegexp);
+      if (matches) {
         // console.log('header matches: ', matches);
         this.headers.push({ key: matches[1], value: matches[2] });
       }
