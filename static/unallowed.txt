@@ -1,0 +1,2 @@
+this file is unallowed when root is owner
+$ sudo chown root:wheen ./unallowed.txt
