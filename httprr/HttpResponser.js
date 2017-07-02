@@ -28,7 +28,6 @@ class HttpResponser extends Writable {
   }
 
   writeHead(code) {
-    console.log('writeHead invoked: ', code);
     if (!this.statusSent) {
       this.socket.write(`HTTP/1.1 ${code} ${httpStatuses[code] || ''}\r\n`);
       this.statusSent = true;
@@ -86,8 +85,6 @@ class HttpResponser extends Writable {
       `Content-Type: ${this.getMimeType(this.path.split('.').pop())}`
     ];
     this.socket.write(`${responseHeaders.join('\r\n')}\r\n\r\n`);
-
-    let bytesRedTotal = 0;
     // todo: change to less memory usage method -> fs.read
     fs.readFile(fd, (err, data) => {
       // console.log('read iteration ', data.length);
@@ -97,15 +94,6 @@ class HttpResponser extends Writable {
       }
 
       this.socket.end(data);
-
-      bytesRedTotal += data.length;
-      if (bytesRedTotal >= stats.size) {
-        console.log(
-          'bytes read total: %s fsize: %s',
-          bytesRedTotal,
-          stats.size
-        );
-      }
     });
   }
 

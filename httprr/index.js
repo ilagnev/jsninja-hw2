@@ -25,10 +25,10 @@ class httprr extends EventEmitter {
     server.on('connection', socket => {
       console.log('\n-> new connection');
       socket.on('close', () => {
-        console.log('r: connection closed');
+        console.log('-> connection closed');
       });
       socket.on('error', err => {
-        console.log('r:!! caught unexpected connection error: ', err.code);
+        console.log('->!! caught unexpected connection error: ', err.code);
       });
 
       this.req = new HttpRequester(socket);
@@ -39,7 +39,7 @@ class httprr extends EventEmitter {
         this.emit('request', this.req, this.res);
 
         // somehow send requested content
-        // this.res.processResponse();
+        // this.res.processResponse(this.req.url);
       });
     });
 

@@ -55,6 +55,7 @@ class HttpRequester extends Readable {
     this.socket.pause();
 
     // show debug info about request to console
+    /*
     console.log('request method: ', this.method);
     console.log('request url: ', this.url);
     console.log(
@@ -62,6 +63,7 @@ class HttpRequester extends Readable {
         .map(h => `[${h.key}] ${h.value}`)
         .join('\n\t')}\n`
     );
+    */
 
     this.emit('headers');
   }
