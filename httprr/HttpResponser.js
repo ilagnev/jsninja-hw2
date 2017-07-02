@@ -9,6 +9,7 @@ class HttpResponser extends Writable {
     this.statusSent = false;
     this.headersSent = false;
     this.headers = [];
+    this.publicDir = './static';
 
     this.on('pipe', src => {
       src.on('close', () => this.pipeSrcClosed());
@@ -66,38 +67,41 @@ class HttpResponser extends Writable {
   processResponse(url) {
     const requestedPath = this.publicDir + url;
     fs.open(requestedPath, 'r', (err, fd) => {
-      if (err || !fd) {
+      if (err) {
         switch (err.code) {
           case 'EACCES':
-            this.sendError('403 Forbidden');
+            this.sendError(403);
             break;
           case 'ENOENT':
-            this.sendError('404 Not Found');
+            this.sendError(404);
             break;
           default:
-            this.sendError('400 Bad Request');
+            this.sendError(400);
             break;
         }
+      } else if (!fd) {
+        this.sendError(404);
+      } else {
+        // get path info and send file or dir list
+        fs.fstat(fd, (errStat, stats) => {
+          if (stats.isFile()) {
+            this.sendFileContent(fd, stats, requestedPath.split('/').pop());
+          } else if (stats.isDirectory()) {
+            this.sendDirContent(requestedPath);
+          }
+        });
       }
-
-      // get path info and send file or dir list
-      fs.fstat(fd, (errStat, stats) => {
-        if (stats.isFile()) {
-          this.sendFileContent(fd, stats);
-        } else if (stats.isDirectory()) {
-          this.sendDirContent(requestedPath);
-        }
-      });
     });
   }
 
-  sendFileContent(fd, stats) {
+  sendFileContent(fd, stats, fname) {
     const responseHeaders = [
       `HTTP/1.1 200 OK`,
       `Content-Length: ${stats.size}`,
-      `Content-Type: ${this.getMimeType(this.path.split('.').pop())}`
+      `Content-Type: ${this.constructor.getMimeType(fname.split('.').pop())}`
     ];
     this.socket.write(`${responseHeaders.join('\r\n')}\r\n\r\n`);
+
     // todo: change to less memory usage method -> fs.read
     fs.readFile(fd, (err, data) => {
       // console.log('read iteration ', data.length);
@@ -113,7 +117,7 @@ class HttpResponser extends Writable {
   sendDirContent(path) {
     const responseHeaders = [
       'HTTP/1.1 200 OK',
-      `Content-Type: ${this.getMimeType('html')}`
+      `Content-Type: ${this.constructor.getMimeType('html')}`
     ];
     this.socket.write(`${responseHeaders.join('\r\n')}\r\n\r\n`);
 
@@ -123,9 +127,7 @@ class HttpResponser extends Writable {
         return;
       }
 
-      const linkBasePath = this.path[this.path.length - 1] === '/'
-        ? this.path
-        : `${this.path}/`;
+      const linkBasePath = (`${path}/`.replace(this.publicDir, '/')).replace(/[/]+/g, '/');
 
       // possible xss attack through {path} variable ^_^
       this.socket.end(
@@ -156,8 +158,9 @@ class HttpResponser extends Writable {
     }
   }
 
-  sendError(header) {
-    this.socket.end(`HTTP/1.1 ${header}\r\n\r\n`);
+  sendError(httpCode) {
+    const message = `${httpCode} ${httpStatuses[httpCode] || ''}`;
+    this.socket.end(`HTTP/1.1 ${message}\r\n\r\n${message}`);
   }
 }
 

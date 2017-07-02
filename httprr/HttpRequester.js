@@ -7,7 +7,6 @@ class HttpRequester extends Readable {
 
     this.socket = socket;
     this.requestBuf = Buffer.allocUnsafe(0);
-    this.publicDir = './static';
 
     this.headersParsed = false;
     this.headers = [];
