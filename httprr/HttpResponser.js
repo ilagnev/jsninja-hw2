@@ -24,7 +24,11 @@ class HttpResponser extends Writable {
   }
 
   setHeader(name, value) {
-    this.headers.push({ name, value });
+    if (this.headersSent) {
+      this.emit('error', new Error('Headers already sent'));
+    } else {
+      this.headers.push({ name, value });
+    }
   }
 
   writeHead(code) {
@@ -34,17 +38,26 @@ class HttpResponser extends Writable {
     }
   }
 
+  writeHeaders() {
+    if (this.headersSent) {
+      this.emit('error', new Error('Headers already sent'));
+    } else {
+      if (this.headers.length) {
+        this.socket.write(
+          `${this.headers
+            .map(header => `${header.name}: ${header.value}`)
+            .join('\r\n')}\r\n\r\n`
+        );
+      }
+      this.headersSent = true;
+    }
+  }
+
   _write(data) {
     if (!this.headersSent) {
       if (!this.statusSent) this.writeHead(200);
-
-      this.socket.write(
-        `${this.headers
-          .map(header => `${header.name}: ${header.value}`)
-          .join('\r\n')}\r\n\r\n`
-      );
+      this.writeHeaders();
     }
-    console.log('data pushed to _write', data);
 
     this.socket.write(data);
     // this.socket.end();
