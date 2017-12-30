@@ -1,4 +1,4 @@
-const fs = require('fs');
+// const fs = require('fs');
 const server = require('./httprr').createServer();
 
 server.on('request', (req, res) => {
