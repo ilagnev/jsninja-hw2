@@ -18,7 +18,7 @@ class HttpRequester extends Readable {
 
   onDataReceived(data) {
     // save received data to buffer
-    // console.log("data received: ", data);
+    // console.log('data received: ', data.toString().indexOf('\r\n'));
     this.requestBuf = Buffer.concat([this.requestBuf, data]);
 
     // check buffer for sequence of \r\n\r\n
