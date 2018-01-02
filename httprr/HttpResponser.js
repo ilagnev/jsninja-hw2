@@ -36,6 +36,8 @@ class HttpResponser extends Writable {
     if (!this.statusSent) {
       this.socket.write(`HTTP/1.1 ${code} ${httpStatuses[code] || ''}\r\n`);
       this.statusSent = true;
+    } else {
+      this.emit('error', new Error('Status already sent'));
     }
   }
 
@@ -127,7 +129,9 @@ class HttpResponser extends Writable {
         return;
       }
 
-      const linkBasePath = (`${path}/`.replace(this.publicDir, '/')).replace(/[/]+/g, '/');
+      const linkBasePath = `${path}/`
+        .replace(this.publicDir, '/')
+        .replace(/[/]+/g, '/');
 
       // possible xss attack through {path} variable ^_^
       this.socket.end(

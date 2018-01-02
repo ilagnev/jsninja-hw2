@@ -19,11 +19,8 @@ Cookie: logged_in=yes; tz=Europe%2FKiev
 test.cb('Should correctly handle when headers come in several chunks', t => {
   t.plan(4);
 
-  // sample readable socket
-  const socket = new Readable({
-    read: () => {}
-  });
-  // sample request instance
+  // sample socket and request instances
+  const socket = new Readable({ read: () => {} });
   const req = new HttpRequester(socket);
 
   // split headers to 2 chanks
@@ -48,4 +45,22 @@ test.cb('Should correctly handle when headers come in several chunks', t => {
     // push second part of headers
     socket.push(Buffer.from(headersPartTwo));
   });
+});
+
+test.cb('Should correctly parse headers, method and url', t => {
+  t.plan(4);
+
+  // sample socket and request instances
+  const socket = new Readable({ read: () => {} });
+  const req = new HttpRequester(socket);
+
+  req.on('headers', () => {
+    t.true(req.headersParsed);
+    t.is(req.headers.length, 10);
+    t.is(req.method, 'GET');
+    t.is(req.url, '/stevemao/left-pad');
+    t.end();
+  });
+
+  socket.push(headersSample);
 });
