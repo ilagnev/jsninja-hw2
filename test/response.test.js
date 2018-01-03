@@ -2,6 +2,37 @@ import test from 'ava';
 import { Writable } from 'stream';
 import HttpResponser from '../httprr/HttpResponser';
 
+test.cb('Call setHeader not send headers, and writeHeaders send', t => {
+  t.plan(3);
+
+  // fake socket save all pushed data to sentData var
+  let sentData = '';
+  const testHeadersString = 'HTTP/1.1 200 OK\r\nServer: ava test\r\n\r\n';
+  const socket = new Writable({
+    write: (data, enc, cb) => {
+      sentData += data.toString();
+      cb();
+    }
+  });
+  // create response instance
+  const res = new HttpResponser(socket);
+
+  // check that function esists
+  t.is(typeof res.setHeader, 'function');
+  // set header
+  res.setHeader('Server', 'ava test');
+
+  setTimeout(() => {
+    // check that headers data not sent
+    t.is(sentData, '');
+    // write headers to socket
+    res.writeHeaders();
+    // check sent data
+    t.is(sentData, testHeadersString);
+    t.end();
+  });
+});
+
 test.cb(
   'Call to setHeader should emit error when headers already have been sent',
   t => {

@@ -45,6 +45,9 @@ class HttpResponser extends Writable {
     if (this.headersSent) {
       this.emit('error', new Error('Headers already sent'));
     } else {
+      if (!this.statusSent) {
+        this.writeHead(200);
+      }
       if (this.headers.length) {
         this.socket.write(
           `${this.headers
@@ -58,7 +61,6 @@ class HttpResponser extends Writable {
 
   _write(data) {
     if (!this.headersSent) {
-      if (!this.statusSent) this.writeHead(200);
       this.writeHeaders();
     }
 

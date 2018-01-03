@@ -64,3 +64,29 @@ test.cb('Should correctly parse headers, method and url', t => {
 
   socket.push(headersSample);
 });
+
+test.cb(
+  'HttpRequest should be readable stream and data should be body without headers',
+  t => {
+    t.plan(3);
+
+    // sample body data
+    const testBodyString = 'test body data';
+    // sample socket and request instances
+    const socket = new Readable({ read: () => {} });
+    const req = new HttpRequester(socket);
+
+    req.on('data', data => {
+      // check that headers parsed correctly
+      t.true(req.headersParsed);
+      t.is(req.headers.length, 10);
+      // check that body without headers and same as pushed to socket
+      t.is(data.toString(), testBodyString);
+      t.end();
+    });
+
+    // send headers and body to socket
+    socket.push(headersSample);
+    socket.push(testBodyString);
+  }
+);
