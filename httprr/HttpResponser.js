@@ -33,12 +33,20 @@ class HttpResponser extends Writable {
   }
 
   writeHead(code) {
-    if (!this.statusSent) {
-      this.socket.write(`HTTP/1.1 ${code} ${httpStatuses[code] || ''}\r\n`);
-      this.statusSent = true;
-    } else {
+    // check that status sent
+    if (this.statusSent) {
       this.emit('error', new Error('Status already sent'));
+      return;
     }
+    // check passed code
+    if (!code) {
+      this.emit('error', new Error('Status should not be empty'));
+      return;
+    }
+
+    // send status to socket
+    this.socket.write(`HTTP/1.1 ${code} ${httpStatuses[code] || ''}\r\n`);
+    this.statusSent = true;
   }
 
   writeHeaders() {
