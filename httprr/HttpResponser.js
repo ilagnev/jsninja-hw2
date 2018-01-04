@@ -8,7 +8,7 @@ class HttpResponser extends Writable {
     this.socket = socket;
     this.statusSent = false;
     this.headersSent = false;
-    this.headers = [];
+    this.headers = {};
     this.publicDir = './static';
 
     this.on('pipe', src => {
@@ -28,14 +28,14 @@ class HttpResponser extends Writable {
     if (this.headersSent) {
       this.emit('error', new Error('Headers already sent'));
     } else {
-      this.headers.push({ name, value });
+      this.headers[name] = value;
     }
   }
 
-  writeHead(code) {
+  writeHead(code, headers) {
     // check that status sent
-    if (this.statusSent) {
-      this.emit('error', new Error('Status already sent'));
+    if (this.headersSent) {
+      this.emit('error', new Error('Headers already sent'));
       return;
     }
     // check passed code
@@ -44,36 +44,35 @@ class HttpResponser extends Writable {
       return;
     }
 
+    // if additional headers passed - merge them with existings
+    if (typeof headers === 'object' && Object.keys(headers).length) {
+      Object.assign(this.headers, headers);
+    }
+
     // send status to socket
     this.socket.write(`HTTP/1.1 ${code} ${httpStatuses[code] || ''}\r\n`);
-    this.statusSent = true;
-  }
+    // this.statusSent = true;
 
-  writeHeaders() {
-    if (this.headersSent) {
-      this.emit('error', new Error('Headers already sent'));
-    } else {
-      if (!this.statusSent) {
-        this.writeHead(200);
-      }
-      if (this.headers.length) {
-        this.socket.write(
-          `${this.headers
-            .map(header => `${header.name}: ${header.value}`)
-            .join('\r\n')}\r\n\r\n`
-        );
-      }
-      this.headersSent = true;
+    // compose headers to the string and write it to the socket
+    if (Object.keys(this.headers).length) {
+      const headersString = Object.keys(this.headers)
+        .map(headerName => `${headerName}: ${this.headers[headerName]}`)
+        .join('\r\n');
+      this.socket.write(headersString);
     }
+
+    // write headers end marker and set flag that headers have been sent
+    this.socket.write('\r\n\r\n');
+    this.headersSent = true;
   }
 
-  _write(data) {
+  _write(data, encoding, cb) {
     if (!this.headersSent) {
-      this.writeHeaders();
+      this.writeHead(200);
     }
 
     this.socket.write(data);
-    // this.socket.end();
+    cb();
   }
 
   processResponse(url) {
