@@ -40,8 +40,9 @@ class HttpServer extends EventEmitter {
 
   listen(port) {
     const listeningPort = process.env.PORT || port || 3000;
-    console.log(`start server on localhost:${listeningPort}`);
-    this.server.listen(listeningPort);
+    this.server.listen(listeningPort, () => {
+      console.log(`start server on localhost:${listeningPort}`);
+    });
   }
 }
 
