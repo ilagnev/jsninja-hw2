@@ -11,3 +11,5 @@ server.on('request', (req, res) => {
 
   res.processResponse(req.url);
 });
+
+server.listen();
