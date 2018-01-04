@@ -2,6 +2,11 @@ import test from 'ava';
 import { Writable } from 'stream';
 import HttpResponser from '../httprr/HttpResponser';
 
+test('Response should be writtable stream', t => {
+  const res = new HttpResponser({});
+  t.true(res instanceof Writable);
+});
+
 test.cb('Call setHeader not send headers, and writeHeaders send', t => {
   t.plan(3);
 
