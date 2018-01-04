@@ -39,5 +39,8 @@
   },
   "prettier": {
     "singleQuote": true
+  },
+  "dependencies": {
+    "sinon": "^4.1.3"
   }
 }
