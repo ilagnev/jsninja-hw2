@@ -14,6 +14,7 @@ class HttpRequester extends Readable {
     this.url = null;
 
     socket.on('data', data => this.onDataReceived(data));
+    socket.on('close', () => this.emit('close'));
   }
 
   onDataReceived(data) {
@@ -52,17 +53,6 @@ class HttpRequester extends Readable {
     // return body data back to stream and pause
     this.socket.unshift(this.requestBuf.slice(headersEndPosition + 4));
     this.socket.pause();
-
-    // show debug info about request to console
-    /*
-    console.log('request method: ', this.method);
-    console.log('request url: ', this.url);
-    console.log(
-      `request headers: \n\t${this.headers
-        .map(h => `[${h.key}] ${h.value}`)
-        .join('\n\t')}\n`
-    );
-    */
 
     this.emit('headers');
   }

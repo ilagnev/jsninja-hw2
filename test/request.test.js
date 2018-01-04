@@ -47,6 +47,28 @@ test.cb('Should correctly handle when headers come in several chunks', t => {
   });
 });
 
+test.cb('Should correctly handle when chunks split on headers marker', t => {
+  t.plan(2);
+
+  // sample socket and request instances
+  const socket = new Readable({ read: () => {} });
+  const req = new HttpRequester(socket);
+
+  // check that headers parsed correctly
+  req.on('headers', () => {
+    t.true(req.headersParsed);
+    t.true(req.headers.length > 0);
+    t.end();
+  });
+
+  // send first chunk
+  socket.push('GET /stevemao/left-pad HTTP/1.1\r\nHost: github.com\r\n');
+  // emulate second chunk pushed with delay
+  setTimeout(() => {
+    socket.push('\r\nrequest body');
+  });
+});
+
 test.cb('Should correctly parse headers, method and url', t => {
   t.plan(4);
 
@@ -90,3 +112,17 @@ test.cb(
     socket.push(testBodyString);
   }
 );
+
+test.cb('Should emit close event when socket closed', t => {
+  // sample socket and request instances
+  const socket = new Readable({ read: () => {} });
+  const req = new HttpRequester(socket);
+
+  // check close event
+  req.on('close', () => {
+    t.end();
+  });
+
+  // send socket close event
+  socket.emit('close');
+});
