@@ -17,12 +17,13 @@ class HttpServer extends EventEmitter {
     });
 
     this.server.on('connection', socket => {
-      console.log('\n-> new connection');
+      // console.log('\n-> new connection');
       socket.on('close', () => {
         console.log('-> connection closed');
       });
       socket.on('error', err => {
-        console.log('->!! caught unexpected connection error: ', err.code);
+        // console.log('->!! connection error: ', err.message);
+        this.emit('error', err);
       });
 
       this.req = new HttpRequester(socket);
