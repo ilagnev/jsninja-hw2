@@ -13,28 +13,25 @@ class HttpServer extends EventEmitter {
     this.server = net.createServer();
 
     this.server.on('error', err => {
-      console.log('server interrupted with error: %s', err.code);
+      // console.err('server interrupted with error: %s', err.code);
+      this.emit('error', err);
     });
 
     this.server.on('connection', socket => {
       // console.log('\n-> new connection');
+      const req = new HttpRequester(socket);
+      const res = new HttpResponser(socket);
+
       socket.on('close', () => {
-        console.log('-> connection closed');
+        // console.log('-> connection closed');
       });
       socket.on('error', err => {
         // console.log('->!! connection error: ', err.message);
         this.emit('error', err);
       });
 
-      this.req = new HttpRequester(socket);
-      this.res = new HttpResponser(socket);
-
-      this.req.on('headers', () => {
-        // console.log('headers parsed emitted');
-        this.emit('request', this.req, this.res);
-
-        // somehow send requested content
-        // this.res.processResponse(this.req.url);
+      req.on('headers', () => {
+        this.emit('request', req, res);
       });
     });
   }

@@ -2,7 +2,7 @@
 const server = require('./httprr').createServer();
 
 server.on('request', (req, res) => {
-  console.log(req.headers, req.method, req.url);
+  console.log(req.method, req.url, req.headers);
 
   // res.setHeader('Content-Type', 'application/json');
   // optional
