@@ -8,7 +8,7 @@ import HttpServer from '../httprr/HttpServer';
 import HttpRequester from '../httprr/HttpRequester';
 import HttpResponser from '../httprr/HttpResponser';
 
-test('createServer should return instance of http class', t => {
+test('createServer should return instance of HttpServer class', t => {
   t.plan(2);
 
   // check function exists

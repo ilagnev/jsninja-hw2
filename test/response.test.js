@@ -3,12 +3,12 @@ import { Writable } from 'stream';
 import crypto from 'crypto';
 import HttpResponser from '../httprr/HttpResponser';
 
-test('Response should be writtable stream', t => {
+test('HttpResponser should be writtable stream', t => {
   const res = new HttpResponser({});
   t.true(res instanceof Writable);
 });
 
-test.cb('Call setHeader not send headers, only writeHead send', t => {
+test.cb('should send headers on writeHead call, not setHeader', t => {
   t.plan(3);
 
   // fake socket save all pushed data to sentData var
@@ -39,7 +39,7 @@ test.cb('Call setHeader not send headers, only writeHead send', t => {
   });
 });
 
-test('All headers set to response should be written to the socket', t => {
+test('all headers set to response should be written to the socket', t => {
   const testHeadersString = `HTTP/1.1 200 OK\r\nServer: ava test\r\nDigest: abcdf666\r\n\r\n`;
 
   // fake socket save all pushed data to sentData var
@@ -60,34 +60,31 @@ test('All headers set to response should be written to the socket', t => {
   t.is(sentData, testHeadersString);
 });
 
-test.cb(
-  'Call setHeader should emit error when headers already have been sent',
-  t => {
-    t.plan(2);
+test.cb('should emit error when headers already have been sent', t => {
+  t.plan(2);
 
-    // create sample socket and response instances
-    const socket = new Writable({ write: () => {} });
-    const res = new HttpResponser(socket);
+  // create sample socket and response instances
+  const socket = new Writable({ write: () => {} });
+  const res = new HttpResponser(socket);
 
-    // attach listener for error
-    res.on('error', err => {
-      t.true(err instanceof Error);
-      t.is(err.message, 'Headers already sent');
-      t.end();
-    });
+  // attach listener for error
+  res.on('error', err => {
+    t.true(err instanceof Error);
+    t.is(err.message, 'Headers already sent');
+    t.end();
+  });
 
-    // set headers
-    res.setHeader('Timestamp', Date.now());
-    // send response headers with status code 200
-    res.writeHead(200);
+  // set headers
+  res.setHeader('Timestamp', Date.now());
+  // send response headers with status code 200
+  res.writeHead(200);
 
-    // try to set additional header after headers sent
-    res.setHeader('Server', 'ava test');
-  }
-);
+  // try to set additional header after headers sent
+  res.setHeader('Server', 'ava test');
+});
 
-test('Should correctly send data in few chanks', t => {
-  // length will be 4096 because hex code each byte in FF
+test('should correctly send data in few chunks', t => {
+  // length will be 4096 because hex code each byte in two chars (FF)
   const sampleBigData = crypto.randomBytes(2048).toString('hex');
 
   // fake socket save all pushed data to sentData var
@@ -116,7 +113,7 @@ test('Should correctly send data in few chanks', t => {
   write head method tests 
 */
 
-test('Call writeHead without status code should emit error', t => {
+test('should emit error when writeHead invoked without status code', t => {
   t.plan(2);
 
   // create sample socket and response instances
@@ -133,7 +130,7 @@ test('Call writeHead without status code should emit error', t => {
   res.writeHead();
 });
 
-test.cb('Call to writeHead should send corresponding status code', t => {
+test.cb('writeHead should send corresponding status code', t => {
   t.plan(1);
 
   const socket = new Writable({
@@ -146,7 +143,7 @@ test.cb('Call to writeHead should send corresponding status code', t => {
   res.writeHead(200);
 });
 
-test.cb('Call to writeHead few times should emit error', t => {
+test.cb('should emit error when writeHead invoked several times', t => {
   t.plan(2);
 
   // create sample socket and response instances
@@ -165,7 +162,7 @@ test.cb('Call to writeHead few times should emit error', t => {
   res.writeHead(404);
 });
 
-test('writeHead with headers param should overwrite headers with same name', t => {
+test('writeHead should overwrite headers params with same name', t => {
   const testHeadersString = `HTTP/1.1 200 OK\r\nServer: ava test\r\nDigest: 888\r\n\r\n`;
 
   // fake socket save all pushed data to sentData var

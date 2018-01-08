@@ -16,14 +16,14 @@ Cookie: logged_in=yes; tz=Europe%2FKiev
 
 `.replace(/\n/g, '\r\n');
 
-test.cb('Should correctly handle when headers come in several chunks', t => {
+test.cb('should correctly handle when headers come in several chunks', t => {
   t.plan(4);
 
   // sample socket and request instances
   const socket = new Readable({ read: () => {} });
   const req = new HttpRequester(socket);
 
-  // split headers to 2 chanks
+  // split headers to 2 chunks
   // prettier-ignore
   const headersPartOne = headersSample.substring(0, (headersSample.length / 2).toFixed());
   const headersPartTwo = headersSample.substring(headersPartOne.length);
@@ -47,7 +47,7 @@ test.cb('Should correctly handle when headers come in several chunks', t => {
   });
 });
 
-test.cb('Should correctly handle when chunks split on headers marker', t => {
+test.cb('should correctly handle when chunks split on headers marker', t => {
   t.plan(2);
 
   // sample socket and request instances
@@ -69,7 +69,7 @@ test.cb('Should correctly handle when chunks split on headers marker', t => {
   });
 });
 
-test.cb('Should correctly parse headers, method and url', t => {
+test.cb('should correctly parse headers, method and url', t => {
   t.plan(4);
 
   // sample socket and request instances
@@ -88,7 +88,7 @@ test.cb('Should correctly parse headers, method and url', t => {
 });
 
 test.cb(
-  'HttpRequest should be readable stream and data should be body without headers',
+  'HttpRequester should be readable stream and data should be body without headers',
   t => {
     t.plan(3);
 
@@ -113,7 +113,7 @@ test.cb(
   }
 );
 
-test.cb('Should emit close event when socket closed', t => {
+test.cb('should emit close event when socket closed', t => {
   // sample socket and request instances
   const socket = new Readable({ read: () => {} });
   const req = new HttpRequester(socket);
