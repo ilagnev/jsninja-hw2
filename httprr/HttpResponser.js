@@ -10,18 +10,6 @@ class HttpResponser extends Writable {
     this.headersSent = false;
     this.headers = {};
     this.publicDir = './static';
-
-    this.on('pipe', src => {
-      src.on('close', () => this.pipeSrcClosed());
-    });
-    this.on('unpipe', src => {
-      src.removeEventListener(() => this.pipeSrcClosed());
-    });
-  }
-
-  pipeSrcClosed() {
-    console.log('src close -> socket.end');
-    this.socket.end();
   }
 
   setHeader(name, value) {
@@ -70,8 +58,12 @@ class HttpResponser extends Writable {
     if (!this.headersSent) {
       this.writeHead(200);
     }
-
     this.socket.write(data);
+    cb();
+  }
+
+  _final(cb) {
+    this.socket.end();
     cb();
   }
 
